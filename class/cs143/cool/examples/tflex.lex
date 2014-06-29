@@ -7,7 +7,7 @@
 
 %%
 
-
+\b[Cc][Ll][Aa][Ss][Ss]  return CLASS;
 "else"		return ELSE;
 "fi"		return FI;
 "if"		return IF;
