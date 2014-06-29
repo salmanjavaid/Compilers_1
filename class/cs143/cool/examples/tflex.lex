@@ -1,6 +1,5 @@
 %{
   #include "cool-parse.h"
-
   int num_lines = 0;
 %}
 
@@ -8,7 +7,7 @@
 
 %%
 
-"class"	        return CLASS;
+
 "else"		return ELSE;
 "fi"		return FI;
 "if"		return IF;
