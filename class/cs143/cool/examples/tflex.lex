@@ -35,7 +35,7 @@
 \"([^\\\"]|\\.)*\" 	return STR_CONST;
 "SELF_TYPE"     	return TYPEID;
 "main" 			return OBJECTID;
-[A-Z][a-zA-Z0-9]*	return TYPEID; 
+[A-Z][a-zA-Z0-9_]*	return TYPEID; 
 [a-z][a-zA-Z0-9_]*      return OBJECTID;
 ";"             	return 59;
 [0-9]+			return INT_CONST;
