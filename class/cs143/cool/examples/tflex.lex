@@ -42,7 +42,6 @@
 [0-9]+			return INT_CONST;
 ":"			return 58;
 \n             		{num_lines++;};
->>>>>>> start_conditions
 %%
 
 int yywrap(void){
