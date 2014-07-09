@@ -30,25 +30,26 @@ char *string_buf_ptr;
 
 %%
 
-\"     { string_buf_ptr = string_buf; BEGIN(str); size++;}
+\"     { string_buf_ptr = string_buf; BEGIN(str);}
 
 <str>\"        { /* saw closing quote - all done */
+  yyrestart(yyin);
   BEGIN(INITIAL);
   *string_buf_ptr = '\0';
   /* return string constant token type and
    * value to parser
    */
   int i = 0;
-  string_buf_ptr--;
-   while ( *string_buf_ptr )
-    {
-      yytext[i++] = *(string_buf_ptr--);
-    }
   
-   printf("%s\t%d\n", yytext, i);
-
+  string_buf_ptr-=size;  
+  for (; i < size; i++){
+    printf("%c", *(string_buf_ptr + i));
+    yytext[i]=*(string_buf_ptr + i);
+    printf("%c",yytext[i]);
+  }
+  yytext[i]='\0';
+  printf("\n");
   return ID;
-
  }
 
 <str>\n        {
@@ -56,23 +57,32 @@ char *string_buf_ptr;
   /* generate error message */
  }
 
+
+
 <str>\\[0-7]{1,3} {
   /* octal escape sequence */
   int result;
 
+
   (void) sscanf( yytext + 1, "%o", &result );
+ 
 
-  if ( result > 0xff )
-    /* error, constant is out-of-bounds */
+  if (result == 0x00){
+     *string_buf_ptr++ = '0';
+  } else {
+	    if ( result > 0xff )
+	      /* error, constant is out-of-bounds */
 
-    *string_buf_ptr++ = result;
-   size++;
+	      *string_buf_ptr++ = result;
+  }
+       size++;
  }
 
 <str>\\[0-9]+ {
   /* generate error - bad escape sequence; something
    * like '\48' or '\0777777'
    */
+  printf("Error\n");
  }
 
 <str>\\n  *string_buf_ptr++ = '\n';  size++;
@@ -80,18 +90,22 @@ char *string_buf_ptr;
 <str>\\r  *string_buf_ptr++ = '\r';  size++;
 <str>\\b  *string_buf_ptr++ = '\b';  size++;
 <str>\\f  *string_buf_ptr++ = '\f';  size++;
-
+<str>\\a  *string_buf_ptr++ = '\a';  size++;
 <str>\\(.|\n)  *string_buf_ptr++ = yytext[1];  size++;
 
 <str>[^\\\n\"]+        {
   char *yptr = yytext;
-  size++;
+
   int i = 0;
   while ( *yptr )
     {
       *string_buf_ptr++ = *yptr++;
-      yytext[i++] = *(string_buf_ptr-1);
+      yytext[i] = *(string_buf_ptr-1);
+      /* printf("%c", yytext[i]);  */
+      size++;
+      i++;
     }
+  
  }
 
 
@@ -100,10 +114,10 @@ char *string_buf_ptr;
 main(int argc, char **argv) {
   int res;
   yyin = stdin;
-  printf("UP\n");
+
   while(res = yylex()) {
-    printf("DOWN\n");
-    printf("class: %d lexeme: %s line: %d\n", res, yytext, num_lines);
+    
+     printf("class: %d lexeme: %s line: %d\n", res, yytext, num_lines); 
   }
 /*
 "+" { return(PLUS); }
