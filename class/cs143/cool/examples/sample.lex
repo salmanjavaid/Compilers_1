@@ -43,12 +43,8 @@ char *string_buf_ptr;
   
   string_buf_ptr-=size;  
   for (; i < size; i++){
-    printf("%c", *(string_buf_ptr + i));
     yytext[i]=*(string_buf_ptr + i);
-    printf("%c",yytext[i]);
   }
-  yytext[i]='\0';
-  printf("\n");
   return ID;
  }
 
@@ -56,9 +52,6 @@ char *string_buf_ptr;
   /* error - unterminated string constant */
   /* generate error message */
  }
-
-
-
 <str>\\[0-7]{1,3} {
   /* octal escape sequence */
   int result;
@@ -97,15 +90,12 @@ char *string_buf_ptr;
   char *yptr = yytext;
 
   int i = 0;
-  while ( *yptr )
-    {
+  while ( *yptr ){
       *string_buf_ptr++ = *yptr++;
       yytext[i] = *(string_buf_ptr-1);
-      /* printf("%c", yytext[i]);  */
       size++;
       i++;
     }
-  
  }
 
 
