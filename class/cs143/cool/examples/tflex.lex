@@ -1,6 +1,6 @@
 %{
   #include "cool-parse.h"
-
+  #include "utilities.h"
   int num_lines = 0;
   char string_buf[256];
   char *string_buf_ptr;
@@ -13,29 +13,52 @@
 %%
 
 
-"class"	        return CLASS;
-"else"		return ELSE;
-"fi"		return FI;
-"if"		return IF;
-"inherits"	return INHERITS;
-"let"		return LET;
-"loop"		return LOOP;
-"pool"		return POOL;
-"then"		return THEN;
-"while"		return WHILE;
-"case"		return CASE;
-"esac"		return ESAC;
-"of"		return OF;
-"darrow"	return DARROW;
-"new"		return NEW;
-"isvoid"	return ISVOID;
-"assign"	return ASSIGN;
-"not"		return NOT;
-"{"             return 123;
-"}"             return 125;
-"("             return 40;
-")"             return 41;
-"in"			return IN;
+"class"	        {cool_yylval.symbol = idtable.add_string(strdup(yytext));
+   		  return CLASS;}
+"else"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+		  return ELSE;}
+"fi"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+		  return FI;}
+"if"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  		  return IF;}
+"inherits"	{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+		  return INHERITS;}
+"let"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+		  return LET;}
+"loop"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return LOOP;}
+"pool"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return POOL;}
+"then"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return THEN;}
+"while"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return WHILE;}
+"case"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return CASE;}
+"esac"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return ESAC;}
+"of"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return OF;}
+"<-"	{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return DARROW;}
+"new"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return NEW;}
+"isvoid"	{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return ISVOID;}
+"assign"	{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return ASSIGN;}
+"not"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return NOT;}
+"{"             {cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return 123;}
+"}"             {cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return 125;}
+"("             {cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return 40;}
+")"             {cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return 41;}
+"in"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return IN;}
 [ \t]+            ;
 \"     { string_buf_ptr = string_buf; BEGIN(str);}
 
@@ -53,24 +76,19 @@
     yytext[i]=*(string_buf_ptr + i);
   }
   yytext[i]='\0';
+  cool_yylval.symbol = stringtable.add_string(strdup(yytext));
   return STR_CONST;
  }
 
 <str>\n        {
   /* error - unterminated string constant */
   /* generate error message */
+  
  }
-
-
-
 <str>\\[0-7]{1,3} {
   /* octal escape sequence */
   int result;
-
-
   (void) sscanf( yytext + 1, "%o", &result );
- 
-
   if (result == 0x00){
      *string_buf_ptr++ = '0';
   } else {
@@ -88,7 +106,6 @@
    */
  
  }
-
 <str>\\n  *string_buf_ptr++ = '\n';  size++;
 <str>\\t  *string_buf_ptr++ = '\t';  size++;
 <str>\\r  *string_buf_ptr++ = '\r';  size++;
@@ -96,7 +113,6 @@
 <str>\\f  *string_buf_ptr++ = '\f';  size++;
 <str>\\a  *string_buf_ptr++ = '\a';  size++;
 <str>\\(.|\n)  *string_buf_ptr++ = yytext[1];  size++;
-
 <str>[^\\\n\"]+        {
   char *yptr = yytext;
 
@@ -110,13 +126,22 @@
     }
   
  }
-"SELF_TYPE"     	return TYPEID;
-"main" 			return OBJECTID;
-[A-Z][a-zA-Z0-9_]*	return TYPEID; 
-[a-z][a-zA-Z0-9_]*      return OBJECTID;
-";"             	return 59;
-[0-9]+			return INT_CONST;
-":"			return 58;
+"SELF_TYPE"  		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return TYPEID;}
+"main" 			{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return OBJECTID;}
+[A-Z][a-zA-Z0-9_]*	{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return TYPEID;}
+[a-z][a-zA-Z0-9_]*      {cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return OBJECTID;}
+";"             	{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return 59;}
+[0-9]+			{	cool_yylval.symbol = inttable.add_string(strdup(yytext));
+ 				return INT_CONST;}
+":"			{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return 58;}
+"."			{cool_yylval.symbol = idtable.add_string(strdup(yytext));
+  return 46;}
 \n             		{num_lines++;};
 %%
 
