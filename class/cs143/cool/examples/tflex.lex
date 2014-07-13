@@ -136,8 +136,8 @@
   return OBJECTID;}
 ";"             	{cool_yylval.symbol = idtable.add_string(strdup(yytext));
   return 59;}
-[0-9]+			{	cool_yylval.symbol = inttable.add_string(strdup(yytext));
- 				return INT_CONST;}
+[0-9]+			{cool_yylval.symbol = inttable.add_string(strdup(yytext));
+  return INT_CONST;}
 ":"			{cool_yylval.symbol = idtable.add_string(strdup(yytext));
   return 58;}
 "."			{cool_yylval.symbol = idtable.add_string(strdup(yytext));
@@ -152,7 +152,6 @@ int yywrap(void){
 #ifdef yylex
 #   undef yylex
 extern "C" int yylex() { return cool_yylex(); 
-  /*\b[Ss][Ee][Ll][Ff][_][Tt][Yy][Pp][Ee]*/
 }
 #endif
 
