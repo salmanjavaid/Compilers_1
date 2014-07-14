@@ -1,6 +1,9 @@
 %{
   #include "cool-parse.h"
+<<<<<<< HEAD
   #include "utilities.h"
+=======
+>>>>>>> c_string
   int num_lines = 0;
   char string_buf[256];
   char *string_buf_ptr;
@@ -11,6 +14,9 @@
 
 
 %%
+<<<<<<< HEAD
+\"([^\"]+)\" 	return STR_CONST;
+=======
 
 
 "class"	        {cool_yylval.symbol = idtable.add_string(strdup(yytext));
@@ -60,6 +66,7 @@
 "in"		{cool_yylval.symbol = idtable.add_string(strdup(yytext));
   return IN;}
 [ \t]+            ;
+<<<<<<< HEAD
 \"     { string_buf_ptr = string_buf; BEGIN(str);}
 
 <str>\"        { /* saw closing quote - all done */
@@ -142,6 +149,18 @@
   return 58;}
 "."			{cool_yylval.symbol = idtable.add_string(strdup(yytext));
   return 46;}
+=======
+\b"in"			return IN;
+\"([^\\\"]|\\.)*\" 	return STR_CONST;
+>>>>>>> master
+"SELF_TYPE"     	return TYPEID;
+"main" 			return OBJECTID;
+[A-Z][a-zA-Z0-9_]*	return TYPEID; 
+[a-z][a-zA-Z0-9_]*      return OBJECTID;
+";"             	return 59;
+[0-9]+			return INT_CONST;
+":"			return 58;
+>>>>>>> c_string
 \n             		{num_lines++;};
 %%
 
