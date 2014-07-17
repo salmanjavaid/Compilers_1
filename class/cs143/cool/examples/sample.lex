@@ -21,17 +21,24 @@ int num_lines = 0;
 #define ID     7
 #define INVALID 8
 #define MAX_STR_CONST 256;
+#define COMMENT 11;
 
 char string_buf[256];
 char *string_buf_ptr;
+
+char string_buf_cmnt[256];
+char *string_buf_ptr_cmnt;
  int size = 0;
 %}
 %x str
-
+%x comment
 %%
 
-\"     { string_buf_ptr = string_buf; BEGIN(str);}
+\-- { string_buf_ptr_cmnt = string_buf_cmnt; BEGIN(comment);}
+<comment>. ;
+<comment>\-- {return COMMENT;}
 
+\"     { string_buf_ptr = string_buf; BEGIN(str);}
 <str>\"        { /* saw closing quote - all done */
   yyrestart(yyin);
   BEGIN(INITIAL);
@@ -40,33 +47,25 @@ char *string_buf_ptr;
    * value to parser
    */
   int i = 0;
-  
   string_buf_ptr-=size;  
   for (; i < size; i++){
-    printf("%c", *(string_buf_ptr + i));
+
     yytext[i]=*(string_buf_ptr + i);
-    printf("%c",yytext[i]);
+
   }
   yytext[i]='\0';
-  printf("\n");
+
   return ID;
  }
-
 <str>\n        {
   /* error - unterminated string constant */
   /* generate error message */
  }
-
-
-
+<str>\\0 	    printf("here\n");
 <str>\\[0-7]{1,3} {
   /* octal escape sequence */
   int result;
-
-
   (void) sscanf( yytext + 1, "%o", &result );
- 
-
   if (result == 0x00){
      *string_buf_ptr++ = '0';
   } else {
@@ -77,38 +76,32 @@ char *string_buf_ptr;
   }
        size++;
  }
-
 <str>\\[0-9]+ {
   /* generate error - bad escape sequence; something
    * like '\48' or '\0777777'
    */
   printf("Error\n");
  }
-
-<str>\\n  *string_buf_ptr++ = '\n';  size++;
+<str>\\n  *string_buf_ptr++ = '\n';  size++; printf("here");
 <str>\\t  *string_buf_ptr++ = '\t';  size++;
 <str>\\r  *string_buf_ptr++ = '\r';  size++;
 <str>\\b  *string_buf_ptr++ = '\b';  size++;
 <str>\\f  *string_buf_ptr++ = '\f';  size++;
 <str>\\a  *string_buf_ptr++ = '\a';  size++;
-<str>\\(.|\n)  *string_buf_ptr++ = yytext[1];  size++;
+
+<str>\\(.|\n)  *string_buf_ptr++ = yytext[1];  size++; 
 
 <str>[^\\\n\"]+        {
   char *yptr = yytext;
-
   int i = 0;
   while ( *yptr )
     {
       *string_buf_ptr++ = *yptr++;
       yytext[i] = *(string_buf_ptr-1);
-      /* printf("%c", yytext[i]);  */
       size++;
       i++;
     }
-  
- }
-
-
+}
 %%
 
 main(int argc, char **argv) {
